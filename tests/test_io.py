@@ -83,7 +83,7 @@ def test_forecast_bool_and_missing(tmp_path):
 
 def test_site_override(tmp_path):
     path = tmp_path / "site.json"
-    path.write_text(json.dumps({"latitude": 40, "alt": 300, "wind_height": 10}))
+    path.write_text(json.dumps({"latitude": 40, "alt": 300, "wind_height": 10}), encoding="utf-8")
     site = load_site(path, altitude=100, wind_height=None)
     assert (site["lat"], site["altitude"], site["wind_height"]) == (40, 100, 10)
 
@@ -105,20 +105,25 @@ def test_missing_site():
 
 def test_bad_site_json(tmp_path):
     path = tmp_path / "site.json"
-    path.write_text("not json")
+    path.write_text("not json", encoding="utf-8")
     with pytest.raises(InputError):
         load_site(path)
 
 
 def test_outputs_preserve_precision(tmp_path):
-    rows = [{"date": date(2025, 1, 1), "value": 1 / 3, "flags": ["estimated", "synthetic"]}]
+    rows = [{"date": date(2025, 1, 1), "value": 1 / 3, "flags": ["estimated", "synthetic"], "crop": "玉米"}]
     write_csv(tmp_path / "out.csv", rows)
-    with (tmp_path / "out.csv").open() as handle:
+    with (tmp_path / "out.csv").open(encoding="utf-8", newline="") as handle:
         row = next(csv.DictReader(handle))
     assert float(row["value"]) == 1 / 3
     assert row["flags"] == "estimated;synthetic"
+    assert row["crop"] == "玉米"
     write_json(tmp_path / "out.json", rows)
-    assert json.loads((tmp_path / "out.json").read_text())[0]["date"] == "2025-01-01"
+    assert json.loads((tmp_path / "out.json").read_text(encoding="utf-8"))[0]["date"] == "2025-01-01"
+    for name in ("out.csv", "out.json"):
+        output = (tmp_path / name).read_bytes()
+        assert b"\r\n" not in output
+        assert "玉米".encode("utf-8") in output
 
 
 def test_nonfinite_json_rejected(tmp_path):

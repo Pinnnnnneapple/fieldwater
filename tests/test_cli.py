@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import io
 import json
 import subprocess
 import sys
@@ -24,14 +25,16 @@ def test_schedule_all_outputs(tmp_path, capsys):
     output = capsys.readouterr().out
     assert "Irrigation calendar" in output and "Season summary" in output
     assert "Water balance residual" in output
-    data = json.loads(summary.read_text())
+    for path in (html, daily, summary):
+        assert b"\r\n" not in path.read_bytes()
+    data = json.loads(summary.read_text(encoding="utf-8"))
     assert data["days"] == 150 and abs(data["balance_error"]) < 1e-9
     assert data["irrigation_events"] > 0
-    with daily.open() as handle:
+    with daily.open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
     assert len(rows) == 150
     assert max(abs(float(row["balance_error"])) for row in rows) < 1e-9
-    assert "<svg" in html.read_text()
+    assert "<svg" in html.read_text(encoding="utf-8")
 
 
 @pytest.mark.parametrize("command,label", [("crops", "maize"), ("soils", "loam")])
@@ -46,7 +49,7 @@ def test_temperature_only_et0(tmp_path, capsys, method, flag):
     assert main(["et0", str(ROOT / "examples/weather_temperature_only.csv"), "--site", SITE,
                  "--method", method, "-o", str(output)]) == 0
     assert flag in capsys.readouterr().out
-    with output.open() as handle:
+    with output.open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
     assert len(rows) == 153
     assert all(float(row["et0"]) >= 0 and flag in row["flags"] for row in rows)
@@ -56,6 +59,18 @@ def test_et0_stdout(capsys):
     assert main(["et0", WEATHER, "--lat", "40", "--alt", "300"]) == 0
     rows = list(csv.DictReader(capsys.readouterr().out.splitlines()))
     assert len(rows) == 153 and "radiation_from_sunshine" in rows[0]["flags"]
+
+
+def test_et0_stdout_matches_file_with_windows_newlines(tmp_path, monkeypatch):
+    output = tmp_path / "et0.csv"
+    args = ["et0", WEATHER, "--lat", "40", "--alt", "300"]
+    assert main([*args, "-o", str(output)]) == 0
+    buffer = io.BytesIO()
+    stdout = io.TextIOWrapper(buffer, encoding="cp1252", newline="\r\n")
+    monkeypatch.setattr(sys, "stdout", stdout)
+    assert main(args) == 0
+    stdout.flush()
+    assert buffer.getvalue() == output.read_bytes()
 
 
 @pytest.mark.parametrize("args", [[], ["unknown"], ["schedule", WEATHER], ["et0", WEATHER, "--method", "unknown"]])
@@ -72,7 +87,7 @@ def test_missing_file_and_site(capsys):
 
 def test_bad_weather_and_management(tmp_path, capsys):
     path = tmp_path / "bad.csv"
-    path.write_text("date,tmax,tmin\n2025-05-01,10,20\n")
+    path.write_text("date,tmax,tmin\n2025-05-01,10,20\n", encoding="utf-8")
     assert main(["et0", str(path), "--lat", "40"]) == 3
     assert "data error:" in capsys.readouterr().err
     assert main(["schedule", WEATHER, *BASE, "--efficiency", "0"]) == 3
@@ -99,12 +114,12 @@ def test_next_no_event(capsys):
 
 def test_next_forecast_column(tmp_path, capsys):
     path = tmp_path / "forecast.csv"
-    with open(WEATHER) as handle:
+    with open(WEATHER, encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle)
         rows = list(reader)
         fields = reader.fieldnames + ["is_forecast"]
-    with path.open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow({**row, "is_forecast": row["date"] > "2025-07-01"})
@@ -117,14 +132,14 @@ def test_custom_crop_cli(tmp_path, capsys):
     crop = tmp_path / "crop.json"
     crop.write_text(json.dumps({"key": "test", "name": "Local maize", "kc_ini": .3, "kc_mid": 1.2,
                                "kc_end": .35, "height": 2, "zr_min": .3, "zr_max": 1.2, "p": .55,
-                               "stages": [30, 40, 50, 30], "ky": 1.25}))
+                               "stages": [30, 40, 50, 30], "ky": 1.25}), encoding="utf-8")
     assert main(["schedule", WEATHER, "--site", SITE, "--crop-file", str(crop), "--planting", "2025-05-01", "--soil", "loam"]) == 0
     assert "Local maize" in capsys.readouterr().out
 
 
 def test_module_entrypoint():
     completed = subprocess.run([sys.executable, "-m", "fieldwater", "--version"],
-                               capture_output=True, text=True, check=False)
+                               capture_output=True, text=True, encoding="utf-8", check=False)
     assert completed.returncode == 0
     assert completed.stdout.strip() == "fieldwater 0.1.0"
 

@@ -146,8 +146,8 @@ class ReportTests(unittest.TestCase):
             path = Path(directory) / "season.html"
             for target in (path, str(path)):
                 self.assertIsNone(write_report(target, [day()], {"crop": "玉米"}, "Season 水"))
-                self.assertEqual(path.read_text(encoding="utf-8"),
-                                 render_report([day()], {"crop": "玉米"}, "Season 水"))
+                self.assertEqual(path.read_bytes(),
+                                 render_report([day()], {"crop": "玉米"}, "Season 水").encode("utf-8"))
             previous = path.read_bytes()
             with self.assertRaises(ValueError):
                 write_report(path, [day(kc=float("nan"))], {})

@@ -224,7 +224,7 @@ def write_csv(path: PathLike, rows: Sequence[Mapping[str, Any]]) -> None:
     """Write a daily table, retaining full float precision for balance audits."""
     keys = list(dict.fromkeys(key for row in rows for key in row))
     with open(path, "w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=keys)
+        writer = csv.DictWriter(handle, fieldnames=keys, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             serialized = {key: _serial(value) for key, value in row.items()}
@@ -236,6 +236,6 @@ def write_csv(path: PathLike, rows: Sequence[Mapping[str, Any]]) -> None:
 
 def write_json(path: PathLike, data: Any) -> None:
     """Write strict UTF-8 JSON with ISO dates and no non-finite numbers."""
-    with open(path, "w", encoding="utf-8") as handle:
+    with open(path, "w", encoding="utf-8", newline="") as handle:
         json.dump(_serial(data), handle, indent=2, ensure_ascii=False, allow_nan=False)
         handle.write("\n")

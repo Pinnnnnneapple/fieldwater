@@ -227,4 +227,5 @@ def write_report(path: Union[str, Path], daily: Sequence[Mapping[str, Any]],
                  summary: Mapping[str, Any], title: str = _DEFAULT_TITLE) -> None:
     """Write a UTF-8 HTML report to an existing directory."""
     report = render_report(daily, summary, title)
-    Path(path).write_text(report, encoding="utf-8")
+    with Path(path).open("w", encoding="utf-8", newline="") as handle:
+        handle.write(report)

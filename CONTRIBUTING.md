@@ -1,6 +1,6 @@
 # Contributing
 
-Use Python 3.9 or newer. Runtime code uses only the standard library.
+Use Python 3.10 or newer. Runtime code uses only the standard library.
 
 ```bash
 git clone https://github.com/Pinnnnnneapple/fieldwater.git
@@ -13,7 +13,7 @@ For a scientific change, cite the original equation or table, state units,
 and add an independent numerical regression or conservation check. Explain
 whether a parameter is a published value, a representative selection from a
 range, or a local assumption. Never relabel synthetic data as observations.
-Keep public functions typed and documented, and preserve Python 3.9 support.
+Keep public functions typed and documented, and preserve Python 3.10 support.
 
 For bug reports, include the command, version, input column headings, station
 units, expected result, and a small shareable reproducer. Remove personal or

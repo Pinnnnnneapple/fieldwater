@@ -147,6 +147,8 @@ def _execute(args: argparse.Namespace) -> int:
             print("Flags: " + (", ".join(flags) if flags else "none"))
         else:
             keys = list(dict.fromkeys(key for row in rows for key in row))
+            if hasattr(sys.stdout, "reconfigure"):
+                sys.stdout.reconfigure(encoding="utf-8", newline="")
             writer = csv.DictWriter(sys.stdout, fieldnames=keys, lineterminator="\n")
             writer.writeheader()
             for row in rows:

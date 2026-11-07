@@ -4,7 +4,7 @@ Turn daily weather into a FAO-56 irrigation calendar: when to irrigate, how much
 
 [![CI](https://github.com/Pinnnnnneapple/fieldwater/actions/workflows/ci.yml/badge.svg)](https://github.com/Pinnnnnneapple/fieldwater/actions/workflows/ci.yml)
 [![MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.9%E2%80%933.13-blue.svg)](pyproject.toml)
+[![Python](https://img.shields.io/badge/python-3.10%E2%80%933.14-blue.svg)](pyproject.toml)
 
 ## Why
 
@@ -34,7 +34,7 @@ balance and estimation flags, so an agronomist can check the recommendation.
 
 ## Install
 
-Python 3.9 or newer:
+Python 3.10 or newer:
 
 ```bash
 python -m pip install git+https://github.com/Pinnnnnneapple/fieldwater
@@ -280,7 +280,7 @@ PYTHONPATH=src python3 -m pytest -q
 The suite covers published examples, independent scalar equations, monotonic
 responses, polar geometry, unit conversions, mass conservation, strategies,
 forecast advice, escaped HTML, and direct `main(argv)` calls. CI spans Python
-3.9–3.13 on Linux, Windows, and macOS. Only the local Python interpreter was
+3.10–3.14 on Linux, Windows, and macOS. Only the local Python interpreter was
 executed during initial development; CI verifies the other combinations.
 
 Planned extensions: dual-Kc soil evaporation, measured soil-moisture assimilation,
