@@ -1,0 +1,15 @@
+{
+  "key": "local_maize",
+  "name": "Illustrative maize with shallower initial roots",
+  "kc_ini": 0.3,
+  "kc_mid": 1.2,
+  "kc_end": 0.35,
+  "height": 2.0,
+  "zr_min": 0.3,
+  "zr_max": 1.2,
+  "p": 0.55,
+  "stages": [30, 40, 50, 30],
+  "ky": 1.25,
+  "stage_source": "Illustrative local override; not a measured field calibration.",
+  "notes": "FAO maize Kc/p/Ky with explicitly assumed initial/final roots; replace with local measurements."
+}

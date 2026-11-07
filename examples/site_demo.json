@@ -1,0 +1,9 @@
+{
+  "name": "Synthetic continental demonstration station",
+  "lat": 40.0,
+  "lon": -100.0,
+  "altitude": 300.0,
+  "wind_height": 2.0,
+  "coastal": false,
+  "ko": 0.0
+}

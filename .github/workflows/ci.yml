@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ['3.9', '3.10', '3.11', '3.12', '3.13']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install package and test tools
+        run: python -m pip install -e ".[dev]"
+      - name: Test
+        run: python -m pytest -q
+      - name: CLI examples
+        run: |
+          fieldwater schedule examples/weather_demo.csv --site examples/site_demo.json --crop maize --planting 2025-05-01 --soil loam --html report.html --csv daily.csv --json summary.json
+          fieldwater et0 examples/weather_temperature_only.csv --site examples/site_demo.json --method hargreaves -o temperature-et0.csv
+          fieldwater et0 examples/weather_temperature_only.csv --site examples/site_demo.json -o estimated-pm-et0.csv
+          fieldwater next examples/weather_demo.csv --site examples/site_demo.json --crop maize --planting 2025-05-01 --soil loam --as-of 2025-07-01
